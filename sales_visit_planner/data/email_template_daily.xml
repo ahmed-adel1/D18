@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="email_template_daily_visits" model="mail.template">
+            <field name="name">Daily Visits Reminder</field>
+            <field name="model_id" ref="model_visit_plan"/>
+            <field name="email_from">${(user.email or '')|safe}</field>
+            <field name="subject">Your Visits Today</field>
+            <field name="body_html"><![CDATA[
+            <p>Hello <t t-esc="user.name"/>,</p>
+            <p>Here is the summary of your visits today:</p>
+            <ul>
+                <t t-foreach="records" t-as="visit">
+                    <li><t t-esc="visit.partner_id.name"/> - <t t-esc="visit.visit_date"/></li>
+                </t>
+            </ul>
+        ]]></field>
+        </record>
+
+
+    </data>
+</odoo>

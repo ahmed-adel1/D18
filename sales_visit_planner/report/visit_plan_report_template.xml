@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- QWeb Template for Visit Plan Report -->
+        <template id="report_visit_plan_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="visit">
+                    <div class="page">
+                        <!-- Header -->
+                        <h2 style="text-align:center;">Daily Visit Schedule</h2>
+                        <p>
+                            <strong>Salesperson:</strong>
+                            <span t-esc="visit.salesperson_id.name"/>
+                        </p>
+                        <p>
+                            <strong>Visit Date:</strong>
+                            <span t-esc="visit.visit_date"/>
+                        </p>
+
+                        <!-- Visit Info -->
+                        <table class="table table-sm o_main_table"
+                               style="width:100%; margin-top:15px; border:1px solid #000;">
+                            <thead>
+                                <tr style="background-color:#eee;">
+                                    <th style="border:1px solid #000; padding:5px;">Customer</th>
+                                    <th style="border:1px solid #000; padding:5px;">Purpose</th>
+                                    <th style="border:1px solid #000; padding:5px;">Notes</th>
+                                    <th style="border:1px solid #000; padding:5px;">State</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="border:1px solid #000; padding:5px;">
+                                        <span t-esc="visit.partner_id.name"/>
+                                    </td>
+                                    <td style="border:1px solid #000; padding:5px;">
+                                        <span t-esc="dict(visit.fields_get(allfields=['purpose'])['purpose']['selection'])[visit.purpose]"/>
+                                    </td>
+                                    <td style="direction: rtl; text-align: right;">
+                                        <span t-esc="visit.notes"/>
+                                    </td>
+
+                                    <td style="border:1px solid #000; padding:5px;">
+                                        <span t-esc="dict(visit.fields_get(allfields=['state'])['state']['selection'])[visit.state]"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

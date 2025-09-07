@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ir_cron_daily_visits" model="ir.cron">
+            <field name="name">Daily Visits Reminder</field>
+            <field name="model_id" ref="model_visit_plan"/>
+            <field name="state">code</field>
+            <field name="code">model.send_daily_reminder()</field>
+            <field name="interval_type">days</field>
+            <field name="interval_number">1</field>
+            <field name="active">True</field>
+            <field name="nextcall" eval="(datetime.now() + timedelta(seconds=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+    </data>
+</odoo>

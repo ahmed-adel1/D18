@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_visit_plan_user,visit.plan.user,model_visit_plan,base.group_user,1,1,1,0
+access_visit_plan_manager,visit.plan.manager,model_visit_plan,base.group_system,1,1,1,1
+access_cancel_wizard_user,cancel.wizard user,model_visit_cancel_wizard,base.group_user,1,1,1,0
+
+
