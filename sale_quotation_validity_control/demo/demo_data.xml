@@ -1,0 +1,19 @@
+<odoo>
+    <data noupdate="1">
+        <record id="demo_quote_expiring_2_days" model="sale.order">
+            <field name="name">Demo Quote 2 Days</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="state">draft</field>
+            <field name="validity_days" eval="2"/>
+            <field name="date_order" eval="context_today()"/>
+        </record>
+
+        <record id="demo_quote_expired" model="sale.order">
+            <field name="name">Demo Expired Quote</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="state">draft</field>
+            <field name="validity_days" eval="-1"/>
+            <field name="date_order" eval="context_today()"/>
+        </record>
+    </data>
+</odoo>

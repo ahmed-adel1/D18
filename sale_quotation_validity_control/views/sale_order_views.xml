@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ===== Badge & Validity group in Sale Order form ===== -->
+        <record id="view_order_form_inherit_validity" model="ir.ui.view">
+            <field name="name">sale.order.form.validity</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Red badge for expired quotation -->
+                <xpath expr="//sheet//div[contains(@class, 'oe_title')]" position="inside">
+                    <span class="badge badge-danger" style="margin-left:8px;"
+                          invisible="not is_expired">
+                        Expired
+                    </span>
+                </xpath>
+
+                <!-- Validity group -->
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <group string="Validity">
+                        <group>
+                            <field name="validity_days"/>
+                            <field name="expires_on" readonly="0"/>
+                            <field name="is_expired" readonly="0"/>
+                            <field name="override_expiry" readonly="1"/>
+                            <field name="override_expiry" groups="group_sale_supervisor"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- ===== Add columns to quotation tree ===== -->
+        <record id="view_quotation_list_inherit_validity" model="ir.ui.view">
+            <field name="name">sale.order.list.validity</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="expires_on"/>
+                    <field name="is_expired" widget="boolean_toggle"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- ===== Colorize expired rows in tree ===== -->
+        <record id="view_quotation_list_inherit_validity_colors" model="ir.ui.view">
+            <field name="name">sale.order.list.validity.colors</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+            <field name="priority" eval="20"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="decoration-danger">is_expired</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- ===== Cron for sending expiry reminders ===== -->
+        <record id="ir_cron_send_expiry_reminders" model="ir.cron">
+            <field name="name">Send Quotation Expiry Reminders</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_send_expiry_reminders()</field>
+            <field name="active" eval="True"/>
+            <field name="interval_type">days</field>
+            <field name="interval_number">1</field>
+            <field name="nextcall" eval="(DateTime.now() + relativedelta(hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+    </data>
+</odoo>
+
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<odoo>-->
+<!--    <data>-->
+<!--        &lt;!&ndash; Add red badge near title when expired &ndash;&gt;-->
+<!--        <record id="view_order_form_inherit_validity" model="ir.ui.view">-->
+<!--            <field name="name">sale.order.form.validity</field>-->
+<!--            <field name="model">sale.order</field>-->
+<!--            <field name="inherit_id" ref="sale.view_order_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                &lt;!&ndash; place badge next to title &ndash;&gt;-->
+<!--                <xpath expr="//sheet//div[contains(@class, 'oe_title')]" position="inside">-->
+<!--                    <span class="badge badge-danger" style="margin-left:8px;"-->
+<!--                          invisible="not is_expired">-->
+<!--                        Expired-->
+<!--                    </span>-->
+<!--                </xpath>-->
+<!--                &lt;!&ndash; Add Validity group &ndash;&gt;-->
+<!--                <xpath expr="//field[@name='payment_term_id']" position="after">-->
+<!--                    <group string="Validity">-->
+<!--                        <group>-->
+<!--                            <field name="validity_days"/>-->
+<!--                            <field name="expires_on" readonly="1"/>-->
+<!--                            <field name="is_expired" readonly="1"/>-->
+<!--                            <field name="override_expiry" readonly="1"/>-->
+<!--                            <field name="override_expiry" groups="sales_team.group_sale_manager"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+
+<!--        &lt;!&ndash;         Add columns to quotation tree&ndash;&gt;-->
+<!--        <record id="view_quotation_list_inherit_validity" model="ir.ui.view">-->
+<!--            <field name="name">sale.order.list.validity</field>-->
+<!--            <field name="model">sale.order</field>-->
+<!--            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="//field[@name='partner_id']" position="after">-->
+<!--                    <field name="expires_on"/>-->
+<!--                    <field name="is_expired" widget="boolean_toggle"/>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+
+<!--        &lt;!&ndash;         Colorize expired rows &ndash;&gt;-->
+<!--        <record id="view_quotation_list_inherit_validity_colors" model="ir.ui.view">-->
+<!--            <field name="name">sale.order.list.validity.colors</field>-->
+<!--            <field name="model">sale.order</field>-->
+<!--            <field name="inherit_id" ref="sale.view_quotation_tree"/> &lt;!&ndash; استخدم view الأصلي &ndash;&gt;-->
+<!--            <field name="priority" eval="20"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="//field[@name='partner_id']" position="attributes">-->
+<!--                    <attribute name="decoration-danger">is_expired</attribute>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+
+<!--        &lt;!&ndash;        Quick Filters&ndash;&gt;-->
+<!--        &lt;!&ndash;        <record id="view_sale_order_validity_filters" model="ir.ui.view">&ndash;&gt;-->
+<!--        &lt;!&ndash;            <field name="name">sale.order.search.validity.filters</field>&ndash;&gt;-->
+<!--        &lt;!&ndash;            <field name="model">sale.order</field>&ndash;&gt;-->
+<!--        &lt;!&ndash;            <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>&ndash;&gt;-->
+<!--        &lt;!&ndash;            <field name="arch" type="xml">&ndash;&gt;-->
+<!--        &lt;!&ndash;                <xpath expr="//filter[@name='campaign_id']" position="after">&ndash;&gt;-->
+<!--        &lt;!&ndash;                    &lt;!&ndash; فلتر العروض اللي هتنتهي بعد يومين &ndash;&gt;&ndash;&gt;-->
+<!--        &lt;!&ndash;                    <filter string="Expiring in 2 days" name="expiring_2_days"&ndash;&gt;-->
+<!--        &lt;!&ndash;                            domain="[('state','in',('draft','sent')),('x_expires_on','=', (context_today() + relativedelta(days=2)))]"/>&ndash;&gt;-->
+<!--        &lt;!&ndash;                    &lt;!&ndash; فلتر العروض المنتهية &ndash;&gt;&ndash;&gt;-->
+<!--        &lt;!&ndash;                    <filter string="Expired" name="expired"&ndash;&gt;-->
+<!--        &lt;!&ndash;                            domain="[('state','in',('draft','sent')),('x_is_expired','=',True)]"/>&ndash;&gt;-->
+<!--        &lt;!&ndash;                </xpath>&ndash;&gt;-->
+<!--        &lt;!&ndash;            </field>&ndash;&gt;-->
+<!--        &lt;!&ndash;        </record>&ndash;&gt;-->
+
+
+
+
+<!--        &lt;!&ndash; Cron for expired activity &ndash;&gt;-->
+<!--        <record id="ir_cron_send_expiry_reminders" model="ir.cron">-->
+<!--            <field name="name">Send Quotation Expiry Reminders</field>-->
+<!--            <field name="model_id" ref="sale.model_sale_order"/>-->
+<!--            <field name="state">code</field>-->
+<!--            <field name="code">model.cron_send_expiry_reminders()</field>-->
+<!--            <field name="active" eval="True"/>-->
+<!--            <field name="interval_type">days</field>-->
+<!--            <field name="interval_number">1</field>-->
+<!--            <field name="nextcall" eval="(DateTime.now() + relativedelta(hour=9)).strftime('%Y-%m-%d %H:%M:%S')"/>-->
+<!--        </record>-->
+
+
+<!--        &lt;!&ndash; Scheduled Action / Cron &ndash;&gt;-->
+<!--        <record id="ir_cron_quotation_expiry_reminder" model="ir.cron">-->
+<!--            <field name="name">Quotation Expiry Reminder</field>-->
+<!--            <field name="model_id" ref="sale.model_sale_order"/>-->
+<!--            <field name="state">code</field>-->
+<!--            <field name="code">model.cron_send_expiry_reminders()</field>-->
+<!--            <field name="interval_number">1</field>-->
+<!--            <field name="interval_type">days</field>-->
+<!--            <field name="nextcall" eval="(DateTime.now() + relativedelta(hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>-->
+<!--        </record>-->
+
+
+<!--    </data>-->
+<!--</odoo>-->

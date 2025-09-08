@@ -1,0 +1,17 @@
+<odoo>
+    <record id="demo_quotation_expiring" model="sale.order">
+        <field name="name">SO-DEMO-EXP</field>
+        <field name="partner_id" ref="base.res_partner_3"/>
+        <field name="state">draft</field>
+        <field name="validity_days">2</field>
+        <field name="date_order">2025-09-03</field>
+    </record>
+
+    <record id="demo_quotation_expired" model="sale.order">
+        <field name="name">SO-DEMO-EXPIRED</field>
+        <field name="partner_id" ref="base.res_partner_4"/>
+        <field name="state">draft</field>
+        <field name="validity_days">2</field>
+        <field name="date_order">2025-08-20</field>
+    </record>
+</odoo>

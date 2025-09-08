@@ -1,0 +1,45 @@
+<odoo>
+    <!-- View of the Wizard -->
+    <record id="view_mo_excel_export_wizard" model="ir.ui.view">
+        <field name="name">mo.excel.export.wizard.form</field>
+        <field name="model">mo.excel.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export to Excel">
+                <group>
+                    <field name="mo_ids" widget="many2many_tags"/>
+                    <!-- حذفنا ملف الـ file_data عشان مش هنستخدمه ظاهرياً -->
+                </group>
+                <footer>
+                    <button name="action_export_excel" string="Export" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open the wizard -->
+    <record id="action_mo_excel_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export to Excel</field>
+        <field name="res_model">mo.excel.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_mo_ids': [active_id]}</field>
+    </record>
+
+    <!-- Server Action binding to form view -->
+    <record id="mo_excel_export_server_action" model="ir.actions.server">
+        <field name="name">Export to Excel</field>
+        <field name="model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+wizard = env['mo.excel.export.wizard'].create({'mo_ids': [record.id]})
+action = wizard.action_export_excel()
+action
+    ]]></field>
+    </record>
+
+</odoo>
+
