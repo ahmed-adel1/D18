@@ -55,6 +55,14 @@ class VisitPlan(models.Model):
     ], string="Outcome")
     next_step = fields.Text(string="Next Step")
     lead_id = fields.Many2one('crm.lead', string="Related Lead")
+    reference = fields.Char(string="Reference", required=True, copy=False, readonly=True, default=lambda self: "New")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("reference", "New") == "New":
+                vals["reference"] = self.env["ir.sequence"].next_by_code("sales.visit.plan") or "New"
+        return super().create(vals_list)
 
     def action_set_draft(self):
         for rec in self:

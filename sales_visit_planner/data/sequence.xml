@@ -1,0 +1,8 @@
+<odoo>
+    <record id="seq_sales_visit_plan" model="ir.sequence">
+        <field name="name">Sales Visit Plan</field>
+        <field name="code">sales.visit.plan</field>
+        <field name="prefix">SVP/</field>
+        <field name="padding">4</field>
+    </record>
+</odoo>

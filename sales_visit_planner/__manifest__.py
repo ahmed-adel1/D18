@@ -15,6 +15,7 @@
         'report/visit_plan_report.xml',
         'report/visit_plan_report_template.xml',
         'security/ir.model.access.csv',
+        'data/sequence.xml',
         'views/menu_views.xml',
         'views/visit_plan_views.xml',
         'data/demo.xml',
