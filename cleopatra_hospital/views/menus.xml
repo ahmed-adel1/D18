@@ -1,0 +1,56 @@
+<odoo>
+
+
+    <menuitem id="menu_cleopatra_root"
+              name="Cleopatra"
+              web_icon="cleopatra_hospital,static/description/icon.png"
+    />
+
+
+    <menuitem id="menu_patient_master"
+              name="Patients"
+              parent="menu_cleopatra_root"
+    />
+
+    <menuitem id="menu_patient_views"
+              name="Patients"
+              parent="menu_patient_master"
+              action="action_hospital_patient_views"
+    />
+
+    <menuitem id="menu_hospital_birthday_patients"
+              name="Today's Birthdays"
+              parent="menu_patient_master"
+              action="action_hospital_birthday_patients"
+              sequence="20"/>
+
+
+    <menuitem id="menu_patient_tags"
+              name="Patient Tags"
+              parent="menu_patient_master"
+              action="action_hospital_patient_tag_views"
+    />
+
+
+    <menuitem id="menu_appointment_views"
+              name="Appointments"
+              parent="menu_cleopatra_root"
+              action="action_hospital_appointment_views"
+    />
+
+    <menuitem id="menu_medicines_views"
+              name="Medicines"
+              parent="menu_cleopatra_root"
+              action="action_hospital_medicine_views"
+    />
+
+
+    <!--    ***************************************************-->
+
+
+
+
+
+
+
+</odoo>

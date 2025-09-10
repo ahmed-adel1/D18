@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sequence for Patient Reference -->
+    <record id="sequence_hospital_patient" model="ir.sequence">
+        <field name="name">Patient Reference</field>
+        <field name="code">hospital.patient</field>
+        <field name="prefix">PAT/%(year)s/</field>
+        <field name="padding">5</field>
+        <field eval="False" name="company_id"/>
+    </record>
+    <!-- Form View -->
+    <record id="view_hospital_patient_form" model="ir.ui.view">
+        <field name="name">hospital.patient.form</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <form create="1" delete="1" edit="1">
+                <header>
+                    <button class="btn-primary" invisible="state != 'draft'" name="action_register" string="Register" type="object"/>
+                    <button class="btn-success" invisible="state not in ['registered', 'inactive']" name="action_activate" string="Activate" type="object"/>
+                    <button invisible="state != 'active'" name="action_deactivate" string="Deactivate" type="object"/>
+                    <button invisible="state == 'archived'" name="action_archive" string="Archive" type="object"/>
+                    <button class="btn-secondary" name="action_print_patient_card" string="Print Card" type="object"/>
+                    <button invisible="email == False" name="action_send_email" string="Send Email" type="object"/>
+                    <button invisible="phone_number == False" name="action_send_sms" string="Send SMS" type="object"/>
+                    <field name="state" statusbar_visible="draft,registered,active" widget="statusbar"/>
+                </header>
+                <sheet string="Patient">
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-calendar" name="action_view_appointments" type="object">
+                            <field name="appointment_count" string="Appointments" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <field class="oe_avatar" name="image" widget="image"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="reference" readonly="1"/>
+                        </h1>
+                        <h2>
+                            <field name="name" placeholder="Patient Name" required="1"/>
+                        </h2>
+                        <field name="tag_ids" options="{'color_field': 'color'}" placeholder="Tags..." widget="many2many_tags"/>
+                        <field name="priority" widget="priority"/>
+                    </div>
+                    <group>
+                        <group string="Personal Information">
+                            <field name="date_of_birth" required="1"/>
+                            <field name="age" readonly="1"/>
+                            <field invisible="1" name="is_birthday_today"/>
+                            <div class="alert alert-info" invisible="is_birthday_today == False" role="alert">
+                                <strong>
+                                    🎂 Today is patient's birthday!
+                                </strong>
+                            </div>
+                            <field name="gender" options="{'horizontal': true}" required="1" widget="radio"/>
+                            <field name="marital_status"/>
+                            <field name="blood_group"/>
+                        </group>
+                        <group string="Contact Information">
+                            <field name="phone_number" required="1" widget="phone"/>
+                            <field name="email" widget="email"/>
+                            <field name="emergency_contact_name"/>
+                            <field name="emergency_contact" widget="phone"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="medical_info" string="Medical Information">
+                            <group>
+                                <group string="Physical Measurements">
+                                    <field name="weight"/>
+                                    <field name="height"/>
+                                    <field invisible="bmi == 0" name="bmi" readonly="1"/>
+                                </group>
+                                <group string="Primary Care">
+                                    <field name="doctor_id"/>
+                                    <field name="registration_date" readonly="1"/>
+                                    <field name="last_appointment_date" readonly="1"/>
+                                    <field name="next_appointment_date" readonly="1"/>
+                                </group>
+                            </group>
+                            <group string="Medical History">
+                                <field name="allergies" placeholder="List any known allergies..."/>
+                                <field name="chronic_diseases" placeholder="List chronic diseases..."/>
+                                <field name="current_medications" placeholder="Current medications..."/>
+                                <field name="medical_history" placeholder="Previous surgeries, hospitalizations, etc..."/>
+                            </group>
+                        </page>
+                        <page name="address_info" string="Address &amp; Professional">
+                            <group>
+                                <group string="Address">
+                                    <field name="address" widget="text"/>
+                                    <field name="city"/>
+                                    <field name="country_id" options="{'no_create': True, 'no_open': True}"/>
+                                    <field domain="[('country_id', '=', country_id)]" invisible="country_id == False" name="state_id" options="{'no_create': True}"/>
+                                    <field name="zip"/>
+                                </group>
+                                <group string="Professional Information">
+                                    <field name="occupation"/>
+                                    <field name="employer"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="insurance_info" string="Insurance">
+                            <group>
+                                <group string="Insurance Details">
+                                    <field name="insurance_company"/>
+                                    <field name="insurance_policy_number"/>
+                                    <field name="insurance_validity"/>
+                                    <field name="insurance_active" readonly="1" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="appointments" string="Appointments">
+                            <field name="appointment_ids" readonly="1">
+                                <list create="0" delete="0">
+                                    <field name="reference"/>
+                                    <field name="appointment_date"/>
+                                    <field name="doctor_id"/>
+                                    <field decoration-danger="state == 'cancelled'" decoration-success="state == 'confirmed'" decoration-warning="state == 'pending'" name="state" widget="badge"/>
+                                </list></field>
+                        </page>
+                        <page name="notes" string="Internal Notes">
+                            <field name="notes" placeholder="Add internal notes here..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form></field>
+    </record>
+    <!-- list/List View -->
+    <record id="view_hospital_patient_list" model="ir.ui.view">
+        <field name="name">hospital.patient.list</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <list create="1" decoration-info="is_birthday_today == True" decoration-muted="state == 'archived'" decoration-success="state == 'active'" decoration-warning="state == 'inactive'" delete="1" edit="1" export_xlsx="1" multi_edit="1" sample="0">
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="date_of_birth" optional="hide"/>
+                <field name="age"/>
+                <field name="gender"/>
+                <field name="phone_number" widget="phone"/>
+                <field name="email" optional="show" widget="email"/>
+                <field name="blood_group" optional="hide"/>
+                <field name="doctor_id" optional="show"/>
+                <field name="insurance_active" optional="hide" widget="boolean_toggle"/>
+                <field name="next_appointment_date" optional="show"/>
+                <field decoration-info="state == 'registered'" decoration-muted="state == 'archived'" decoration-success="state == 'active'" decoration-warning="state == 'inactive'" name="state" widget="badge"/>
+                <field invisible="1" name="is_birthday_today"/>
+                <field name="tag_ids" optional="hide" options="{'color_field': 'color'}" widget="many2many_tags"/>
+                <field name="priority" optional="hide" widget="priority"/>
+            </list></field>
+    </record>
+    <!-- Kanban View -->
+    <record id="view_hospital_patient_kanban" model="ir.ui.view">
+        <field name="name">hospital.patient.kanban</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="reference"/>
+                <field name="age"/>
+                <field name="gender"/>
+                <field name="phone_number"/>
+                <field name="email"/>
+                <field name="image"/>
+                <field name="state"/>
+                <field name="doctor_id"/>
+                <field name="tag_ids"/>
+                <field name="priority"/>
+                <field name="is_birthday_today"/>
+                <progressbar colors='{"active": "success", "inactive": "warning", "archived": "danger"}' field="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="o_kanban_image_fill_left d-none d-md-block" t-attf-style="background-image: url(#{kanban_image('hospital.patient', 'image', record.id.raw_value)})">
+                            </div>
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="display_name"/>
+                                            <t t-if="record.is_birthday_today.raw_value">
+                                                <span class="fa fa-birthday-cake" style="color: #f39c12;" title="Birthday Today!"/>
+                                            </t>
+                                        </strong>
+                                        <div class="o_kanban_tags_section">
+                                            <field name="tag_ids" options="{'color_field': 'color'}" widget="many2many_tags"/>
+                                        </div>
+                                    </div>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div>
+                                        <span class="fa fa-user"/>
+                                        <field name="age"/>
+                                        years -
+                                        <field name="gender"/>
+                                    </div>
+                                    <div t-if="record.phone_number.raw_value">
+                                        <span class="fa fa-phone"/>
+                                        <field name="phone_number" widget="phone"/>
+                                    </div>
+                                    <div t-if="record.email.raw_value">
+                                        <span class="fa fa-envelope"/>
+                                        <field name="email"/>
+                                    </div>
+                                    <div t-if="record.doctor_id.raw_value">
+                                        <span class="fa fa-stethoscope"/>
+                                        <field name="doctor_id"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="state" options="{'classes': {'active': 'success', 'inactive': 'warning', 'archived': 'danger'}}" widget="label_selection"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban></field>
+    </record>
+    <!-- Search View -->
+    <record id="view_hospital_patient_search" model="ir.ui.view">
+        <field name="name">hospital.patient.search</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <search>
+                <field filter_domain="['|', ('name', 'ilike', self), ('reference', 'ilike', self)]" name="name"/>
+                <field name="reference"/>
+                <field name="phone_number"/>
+                <field name="email"/>
+                <field name="doctor_id"/>
+                <field name="tag_ids"/>
+
+
+<!--                <filter domain="[('is_birthday_today', '=', True)]" name="birthday_today" string="Birthday Today"/>-->
+                <filter domain="[('state', '=', 'active')]" name="active_patients" string="Active"/>
+                <filter domain="[('state', '=', 'inactive')]" name="inactive_patients" string="Inactive"/>
+
+                <filter domain="[('insurance_active', '=', True)]" name="has_insurance" string="Has Insurance"/>
+                <filter domain="[('insurance_active', '=', False)]" name="no_insurance" string="No Insurance"/>
+                <separator/>
+                <filter domain="[('gender', '=', 'male')]" name="male" string="Male"/>
+                <filter domain="[('gender', '=', 'female')]" name="female" string="Female"/>
+<!--                <filter domain="[('gender', 'not in', ['female','male'] )]" name="other" string="Other"/>-->
+
+                <separator/>
+                <filter domain="[('priority', 'in', ['2', '3'])]" name="high_priority" string="High Priority"/>
+                <separator/>
+<!--                <filter domain="[('doctor_id.user_id', '=', uid)]" name="my_patients" string="My Patients"/>-->
+                <filter domain="[('active', '=', False)]" name="archived" string="Archived"/>
+
+
+                <group expand="0" string="Group By">
+                    <filter context="{'group_by': 'state'}" name="group_by_state" string="Status"/>
+                    <filter context="{'group_by': 'gender'}" name="group_by_gender" string="Gender"/>
+                    <filter context="{'group_by': 'blood_group'}" name="group_by_blood" string="Blood Group"/>
+                    <filter context="{'group_by': 'doctor_id'}" name="group_by_doctor" string="Doctor"/>
+                    <filter context="{'group_by': 'city'}" name="group_by_city" string="City"/>
+                    <filter context="{'group_by': 'insurance_active'}" name="group_by_insurance" string="Insurance Status"/>
+                    <filter context="{'group_by': 'registration_date:month'}" name="group_by_reg_month" string="Registration Month"/>
+                </group>
+
+
+                <searchpanel>
+                    <field enable_counters="1" name="state" string="Status"/>
+                    <field enable_counters="1" name="gender" string="Gender"/>
+                    <field enable_counters="1" name="doctor_id" string="Doctor"/>
+                    <field enable_counters="1" name="tag_ids" select="multi" string="Tags"/>
+                </searchpanel>
+            </search></field>
+    </record>
+    <!-- Calendar View -->
+<!--    <record id="view_hospital_patient_calendar" model="ir.ui.view">-->
+<!--        <field name="name">hospital.patient.calendar</field>-->
+<!--        <field name="model">hospital.patient</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <calendar color="doctor_id" date_start="date_of_birth" event_open_popup="true" mode="year" quick_add="False">-->
+<!--                <field name="name"/>-->
+<!--                <field name="reference"/>-->
+<!--                <field name="phone_number"/>-->
+<!--            </calendar></field>-->
+<!--    </record>-->
+    <!-- Pivot View -->
+    <record id="view_hospital_patient_pivot" model="ir.ui.view">
+        <field name="name">hospital.patient.pivot</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+        <pivot>
+                <field name="state" type="row"/>
+                <field name="gender" type="col"/>
+                <field name="appointment_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- Graph View -->
+    <record id="view_hospital_patient_graph" model="ir.ui.view">
+        <field name="name">hospital.patient.graph</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <graph stacked="True" type="bar">
+                <field name="gender"/>
+                <field name="appointment_count" type="measure"/>
+            </graph></field>
+    </record>
+    <!-- Action Window -->
+    <record id="action_hospital_patient_views" model="ir.actions.act_window">
+        <field name="name">Patients</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hospital.patient</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="context">{'search_default_active_patients': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first patient!
+            </p>
+            <p>
+                Manage patient records, medical history, appointments and more.
+            </p></field>
+    </record>
+    <!-- Today's Birthday Patients Action -->
+    <record id="action_hospital_birthday_patients" model="ir.actions.act_window">
+        <field name="name">Today's Birthdays</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hospital.patient</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('is_birthday_today', '=', True)]</field>
+        <field name="context">{'search_default_birthday_today': 1}</field>
+    </record>
+    <!-- Patient Tags -->
+    <record id="view_hospital_patient_tag_list" model="ir.ui.view">
+        <field name="name">hospital.patient.tag.list</field>
+        <field name="model">hospital.patient.tag</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list></field>
+    </record>
+    <!-- Menu Items -->
+</odoo>

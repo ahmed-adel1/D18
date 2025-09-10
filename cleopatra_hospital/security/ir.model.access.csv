@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hospital_patient,cleopatra_hospital.hospital_patient,model_hospital_patient,,1,1,1,1
+access_hospital_appointment,cleopatra_hospital.hospital_appointment,model_hospital_appointment,,1,1,1,1
+access_hospital_medicine,cleopatra_hospital.hospital_medicine,model_hospital_medicine,,1,1,1,1
+access_appointment_line,cleopatra_hospital.appointment_line,model_appointment_line,,1,1,1,1
+access_hospital_patient_tag,cleopatra_hospital.hospital_patient_tag,model_hospital_patient_tag,,1,1,1,1
+access_hospital_doctor,cleopatra_hospital.hospital_doctor,model_hospital_doctor,,1,1,1,1
